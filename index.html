@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ระบบข้อมูลแปลภาษาไอเทม & สายวัตถุดิบ (Wonderland RE:Start Ark)</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Font Prompt -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Prompt', 'sans-serif'] },
+                    colors: {
+                        brand: {
+                            50: '#f0f7ff', 100: '#e0effe', 500: '#3b82f6', 
+                            600: '#2563eb', 700: '#1d4ed8', 800: '#1e40af', 
+                            900: '#1e3a8a', dark: '#0b0f19', card: '#131b2e'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Prompt', sans-serif; background-color: #0b0f19; color: #f1f5f9; }
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #0f172a; }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #475569; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col bg-[#0b0f19] text-slate-100">
+
+    <!-- Navigation / Header -->
+    <header class="bg-slate-900/95 border-b border-slate-800 sticky top-0 z-40 backdrop-blur-md shadow-xl">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div class="flex items-center gap-3">
+                <div class="p-2.5 bg-blue-600/20 text-blue-400 rounded-xl border border-blue-500/30 shadow-inner">
+                    <i class="fa-solid fa-gem text-2xl"></i>
+                </div>
+                <div>
+                    <h1 class="text-lg sm:text-xl font-bold bg-gradient-to-r from-blue-400 via-indigo-300 to-purple-400 bg-clip-text text-transparent">
+                        ระบบข้อมูลแปลภาษาไอเทม & สายวัตถุดิบ
+                    </h1>
+                    <p class="text-xs text-slate-400">Wonderland Online / RE:Start Ark Database</p>
+                </div>
+            </div>
+
+            <!-- Instant Search Bar -->
+            <div class="w-full sm:w-80 relative">
+                <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                <input type="text" id="searchInput" oninput="handleSearch()" placeholder="ค้นหาชื่อไทย, เลเวล, ค่าสถานะ, วัตถุดิบ..."
+                    class="w-full pl-10 pr-9 py-2 bg-slate-800/90 border border-slate-700 rounded-xl text-xs sm:text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-slate-100 placeholder-slate-400 transition-all shadow-inner">
+                <button id="clearSearch" onclick="clearSearch()" class="hidden absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white transition-colors">
+                    <i class="fa-solid fa-circle-xmark"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Container -->
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-5">
+        
+        <!-- Controls Panel -->
+        <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 sm:p-5 space-y-4 shadow-xl">
+            <!-- Category Filter Buttons -->
+            <div class="flex flex-wrap items-center justify-between gap-3">
+                <div class="flex items-center gap-2 text-xs sm:text-sm text-slate-300 font-medium">
+                    <i class="fa-solid fa-layer-group text-blue-400"></i> หมวดหมู่:
+                </div>
+                <div class="flex flex-wrap gap-1.5 sm:gap-2" id="categoryButtons"></div>
+            </div>
+
+            <hr class="border-slate-800">
+
+            <!-- Level Quick Filters & Counter -->
+            <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-3">
+                <div class="flex flex-wrap items-center gap-1.5 sm:gap-2">
+                    <span class="text-xs text-slate-400 font-medium flex items-center gap-1">
+                        <i class="fa-solid fa-gauge-high text-indigo-400"></i> ระดับเลเวล:
+                    </span>
+                    <button onclick="filterByLevel('all', this)" class="lvl-btn active px-2.5 py-1 text-xs rounded-lg border border-blue-500 bg-blue-600 text-white font-medium transition-all">ทั้งหมด</button>
+                    <button onclick="filterByLevel('100+', this)" class="lvl-btn px-2.5 py-1 text-xs rounded-lg border border-slate-700 bg-slate-800 text-slate-300 hover:bg-slate-700 transition-all">100+</button>
+                    <button onclick="filterByLevel('60-99', this)" class="lvl-btn px-2.5 py-1 text-xs rounded-lg border border-slate-700 bg-slate-800 text-slate-300 hover:bg-slate-700 transition-all">60 - 99</button>
+                    <button onclick="filterByLevel('30-59', this)" class="lvl-btn px-2.5 py-1 text-xs rounded-lg border border-slate-700 bg-slate-800 text-slate-300 hover:bg-slate-700 transition-all">30 - 59</button>
+                    <button onclick="filterByLevel('under30', this)" class="lvl-btn px-2.5 py-1 text-xs rounded-lg border border-slate-700 bg-slate-800 text-slate-300 hover:bg-slate-700 transition-all">&lt; 30</button>
+                </div>
+
+                <div class="text-xs text-slate-400 bg-slate-800/80 px-3 py-1.5 rounded-lg border border-slate-700/60 shadow-inner flex items-center gap-2">
+                    <i class="fa-solid fa-database text-blue-400"></i>
+                    <span>แสดง <strong id="itemCount" class="text-blue-400">0</strong> จากทั้งหมด <strong id="totalCount" class="text-slate-200">0</strong> รายการ</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Desktop / Tablet Table View -->
+        <div class="hidden md:block bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-2xl">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-xs sm:text-sm">
+                    <thead class="bg-slate-800/90 text-slate-300 border-b border-slate-700/80 text-xs uppercase tracking-wider">
+                        <tr>
+                            <th scope="col" class="py-3.5 px-3 text-center w-16">รูป</th>
+                            <th scope="col" class="py-3.5 px-3 text-center w-16">เลเวล</th>
+                            <th scope="col" class="py-3.5 px-4 min-w-[200px]">ชื่อไอเทมภาษาไทย</th>
+                            <th scope="col" class="py-3.5 px-3 text-center w-20">ระดับไอเทม</th>
+                            <th scope="col" class="py-3.5 px-4 min-w-[120px]">คุณสมบัติ</th>
+                            <th scope="col" class="py-3.5 px-4 min-w-[160px]">ค่าสถานะ (Stats)</th>
+                            <th scope="col" class="py-3.5 px-4 min-w-[150px]">วัตถุดิบหลัก</th>
+                            <th scope="col" class="py-3.5 px-4 min-w-[220px]">วัตถุดิบรอง (1-4)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody" class="divide-y divide-slate-800/70 text-slate-300"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Mobile Card View (Smartphone) -->
+        <div id="mobileCards" class="md:hidden space-y-3"></div>
+
+        <!-- Empty Results State -->
+        <div id="noResults" class="hidden py-16 text-center space-y-3 bg-slate-900/50 border border-slate-800 rounded-2xl">
+            <i class="fa-solid fa-magnifying-glass-minus text-4xl text-slate-600"></i>
+            <p class="text-slate-400 text-sm">ไม่พบข้อมูลไอเทมที่คุณค้นหา</p>
+            <button onclick="resetFilters()" class="px-4 py-2 bg-blue-600/20 text-blue-400 border border-blue-500/30 rounded-xl text-xs hover:bg-blue-600/30 transition-all">
+                ล้างการค้นหาและฟิลเตอร์ทั้งหมด
+            </button>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-slate-900 border-t border-slate-800 py-4 text-center text-xs text-slate-500 mt-auto">
+        <p>ระบบแปลข้อมูลไอเทมและวัตถุดิบสังเคราะห์สำหรับ Wonderland Online / RE:Start Ark</p>
+    </footer>
+
+    <script>
+        const itemData = [
+            { id: "item_01", lvl:  "-", th: "ผงดาราแห่งธาตุอากาศ", itemLvl: "2", attr: "สตาร์ไลท์", stats: "ไอเทมระดับ 2", mainMat: "ประกายดาว", subMats: ["-"], cat: "วัตถุดิบ/อื่นๆ" },
+            { id: "item_02", lvl:  "-", th: "ผงดาราแห่งธาตุ・ไฟ・น้ำ・ลม・ดิน", itemLvl: "3", attr: "สตาร์ไลท์", stats: "ไอเทมระดับ 3", mainMat: "ประกายดาว", subMats: ["-"], cat: "วัตถุดิบ/อื่นๆ" },
+            { id: "item_03", lvl: 8, th: "ไม้เท้าแสงดวงประกายดาว", itemLvl: "4", attr: "สตาร์ไลท์", stats: "MATK+5, MDEF+5", mainMat: "ประกายดาว", subMats: ["ดอกไม้"], cat: "อาวุธ" },
+            { id: "item_04", lvl: 8, th: "ดาบโค้งลายดวงประกายดาว", itemLvl: "4", attr: "สตาร์ไลท์", stats: "ATK+5, DEF+5", mainMat: "ประกายดาว", subMats: ["ทองแดง"], cat: "อาวุธ" },
+            { id: "item_05", lvl: 10, th: "เสื้อคลุมเวทย์ลายดวงประกายดาว", itemLvl: "5", attr: "สตาร์ไลท์", stats: "MDEF+6, DEF+4", mainMat: "ประกายดาว", subMats: ["ดอกไม้"], cat: "เครื่องป้องกัน" },
+            { id: "item_06", lvl: 10, th: "ชุดเกราะเบาลายดวงประกายดาว", itemLvl: "5", attr: "สตาร์ไลท์", stats: "DEF+6, MDEF+4", mainMat: "ประกายดาว", subMats: ["ทองแดง"], cat: "เครื่องป้องกัน" },
+            { id: "item_07", lvl: 14, th: "ถุงมือแสงดวงประกายดาว", itemLvl: "7", attr: "สตาร์ไลท์", stats: "MDEF+6", mainMat: "ประกายดาว", subMats: ["ดอกไม้"], cat: "เครื่องป้องกัน" },
+            { id: "item_08", lvl: 14, th: "สนับแขนลายดวงประกายดาว", itemLvl: "7", attr: "สตาร์ไลท์", stats: "DEF+9", mainMat: "ประกายดาว", subMats: ["ทองแดง"], cat: "เครื่องป้องกัน" },
+            { id: "item_09", lvl: 16, th: "มงกุฎแสงดวงประกายดาว", itemLvl: "8", attr: "สตาร์ไลท์", stats: "MATK+9", mainMat: "ประกายดาว", subMats: ["ดอกไม้"], cat: "เครื่องป้องกัน" },
+            { id: "item_10", lvl: 16, th: "หมวกเกราะลายดวงประกายดาว", itemLvl: "8", attr: "สตาร์ไลท์", stats: "DEF+9", mainMat: "ประกายดาว", subMats: ["ทองแดง"], cat: "เครื่องป้องกัน" },
+            { id: "item_11", lvl: 18, th: "รองเท้าแสงดวงประกายดาว", itemLvl: "9", attr: "สตาร์ไลท์", stats: "MATK+13, SPD+1", mainMat: "ประกายดาว", subMats: ["ดอกไม้"], cat: "เครื่องป้องกัน" },
+            { id: "item_12", lvl: 18, th: "รองเท้าลายดวงประกายดาว", itemLvl: "9", attr: "สตาร์ไลท์", stats: "DEF+13, SPD+1", mainMat: "ประกายดาว", subMats: ["ทองแดง"], cat: "เครื่องป้องกัน" },
+            { id: "item_13", lvl: 22, th: "คทาไฟประกายดาว", itemLvl: "11", attr: "สตาร์ไลท์", stats: "MATK+13, SPD+1", mainMat: "ประกายดาว", subMats: ["หญ้า"], cat: "อาวุธ" },
+            { id: "item_14", lvl: 22, th: "ดาบยาววงแหวนประกายดาว", itemLvl: "11", attr: "สตาร์ไลท์", stats: "ATK+12, SPD+10", mainMat: "ประกายดาว", subMats: ["เหล็ก"], cat: "อาวุธ" },
+            { id: "item_15", lvl: 26, th: "เสื้อคลุมเวทย์ไฟประกายดาว", itemLvl: "13", attr: "สตาร์ไลท์", stats: "MDEF+9, SPD+5", mainMat: "ประกายดาว", subMats: ["หญ้า"], cat: "เครื่องป้องกัน" },
+            { id: "item_16", lvl: 26, th: "ชุดเกราะวงแหวนประกายดาว", itemLvl: "13", attr: "สตาร์ไลท์", stats: "DEF+9, SPD+5", mainMat: "ประกายดาว", subMats: ["เหล็ก"], cat: "เครื่องป้องกัน" },
+            { id: "item_17", lvl: 30, th: "ถุงมือไฟประกายดาว", itemLvl: "15", attr: "สตาร์ไลท์", stats: "MATK+17, SPD+1", mainMat: "ประกายดาว", subMats: ["หญ้า"], cat: "เครื่องป้องกัน" },
+            { id: "item_18", lvl: 30, th: "สนับแขนวงแหวนประกายดาว", itemLvl: "15", attr: "สตาร์ไลท์", stats: "DEF+17, SPD+1", mainMat: "ประกายดาว", subMats: ["เหล็ก"], cat: "เครื่องป้องกัน" },
+            { id: "item_19", lvl: 34, th: "มงกุฎเวทย์ไฟประกายดาว", itemLvl: "17", attr: "สตาร์ไลท์", stats: "MDEF+11, DEF+8", mainMat: "ประกายดาว", subMats: ["หญ้า"], cat: "เครื่องป้องกัน" },
+            { id: "item_20", lvl: 34, th: "หมวกเกราะวงแหวนประกายดาว", itemLvl: "17", attr: "สตาร์ไลท์", stats: "DEF+11, MDEF+6", mainMat: "ประกายดาว", subMats: ["เหล็ก"], cat: "เครื่องป้องกัน" },
+            { id: "item_21", lvl: 38, th: "รองเท้าวิญญาณไฟประกายดาว", itemLvl: "19", attr: "สตาร์ไลท์", stats: "MDEF+12, SPD+5", mainMat: "ประกายดาว", subMats: ["หญ้า"], cat: "เครื่องป้องกัน" },
+            { id: "item_22", lvl: 38, th: "รองเท้าวางแหวนประกายดาว", itemLvl: "19", attr: "สตาร์ไลท์", stats: "DEF+12, SPD+5", mainMat: "ประกายดาว", subMats: ["เหล็ก"], cat: "เครื่องป้องกัน" },
+            { id: "item_23", lvl: 42, th: "ธนูรุ่งโรจน์ประกายดาว", itemLvl: "21", attr: "สตาร์ไลท์", stats: "ATK+16, SPD+28", mainMat: "ประกายดาว", subMats: ["ไม้"], cat: "อาวุธ" },
+            { id: "item_24", lvl: "-", th: "แก่นแท้ประกายดาว", itemLvl: "22", attr: "สตาร์ไลท์", stats: "ไอเทมระดับ 22", mainMat: "ประกายดาว", subMats: ["-"], cat: "วัตถุดิบ/อื่นๆ" },
+            { id: "item_25", lvl: 46, th: "เสื้อคลุมเวทย์รุ่งโรจน์ประกายดาว", itemLvl: "23", attr: "สตาร์ไลท์", stats: "MATK+18, SP+60", mainMat: "ประกายดาว", subMats: ["ไม้"], cat: "เครื่องป้องกัน" },
+            { id: "item_26", lvl: 46, th: "ชุดเกราะคมประกายดาว", itemLvl: "23", attr: "สตาร์ไลท์", stats: "DEF+18, HP+60", mainMat: "ประกายดาว", subMats: ["เหล็กแดง"], cat: "เครื่องป้องกัน" },
+            { id: "item_27", lvl: "-", th: "ไม้ทองคำประกายดาว", itemLvl: "24", attr: "สตาร์ไลท์", stats: "ไอเทมระดับ 24", mainMat: "ประกายดาว", subMats: ["-"], cat: "วัตถุดิบ/อื่นๆ" },
+            { id: "item_28", lvl: 50, th: "ถุงมือรุ่งโรจน์ประกายดาว", itemLvl: "25", attr: "สตาร์ไลท์", stats: "MDEF+16, DEF+10", mainMat: "ประกายดาว", subMats: ["ไม้"], cat: "เครื่องป้องกัน" },
+            { id: "item_29", lvl: 50, th: "สนับแขนคมประกายดาว", itemLvl: "25", attr: "สตาร์ไลท์", stats: "DEF+16, MDEF+10", mainMat: "ประกายดาว", subMats: ["เหล็กแดง"], cat: "เครื่องป้องกัน" },
+            { id: "item_30", lvl: "-", th: "แก้วหลากสีประกายดาว", itemLvl: "26", attr: "สตาร์ไลท์", stats: "ไอเทมระดับ 26", mainMat: "ประกายดาว", subMats: ["-"], cat: "วัตถุดิบ/อื่นๆ" },
+            { id: "item_31", lvl: 54, th: "หมวกเกราะคมประกายดาว", itemLvl: "27", attr: "สตาร์ไลท์", stats: "DEF+20, MDEF+8", mainMat: "ประกายดาว", subMats: ["เหล็กแดง"], cat: "เครื่องป้องกัน" },
+            { id: "item_32", lvl: 54, th: "มงกุฎเวทย์รุ่งโรจน์ประกายดาว", itemLvl: "27", attr: "สตาร์ไลท์", stats: "MDEF+21, DEF+7", mainMat: "ประกายดาว", subMats: ["ไม้"], cat: "เครื่องป้องกัน" },
+            { id: "item_33", lvl: "-", th: "เงินลึกลับประกายดาว", itemLvl: "28", attr: "สตาร์ไลท์", stats: "ไอเทมระดับ 28", mainMat: "ประกายดาว", subMats: ["-"], cat: "วัตถุดิบ/อื่นๆ" },
+            { id: "item_34", lvl: 58, th: "รองเท้าเวทย์รุ่งโรจน์ประกายดาว", itemLvl: "29", attr: "สตาร์ไลท์", stats: "DEF+20, SPD+10", mainMat: "ประกายดาว", subMats: ["ไม้"], cat: "เครื่องป้องกัน" },
+            { id: "item_35", lvl: 58, th: "รองเท้าศึกคมประกายดาว", itemLvl: "29", attr: "สตาร์ไลท์", stats: "DEF+35, SPD-5", mainMat: "ประกายดาว", subMats: ["เหล็กแดง"], cat: "เครื่องป้องกัน" },
+            { id: "item_36", lvl: 60, th: "ดาบฝุ่นประกายดาว", itemLvl: "30", attr: "สตาร์ไลท์", stats: "ATK+40, SPD+20", mainMat: "ประกายดาว", subMats: ["ทองแดง"], cat: "อาวุธ" },
+            { id: "item_37", lvl: 60, th: "กระบี่ฝุ่นประกายดาว", itemLvl: "30", attr: "สตาร์ไลท์", stats: "MATK+40, SPD+20", mainMat: "ประกายดาว", subMats: ["ทองแดง", "กระดูก"], cat: "อาวุธ" },
+            { id: "item_38", lvl: 60, th: "หมวกฝุ่นประกายดาว", itemLvl: "30", attr: "สตาร์ไลท์", stats: "SPD+21, HP+100", mainMat: "ประกายดาว", subMats: ["อะลูมิเนียม"], cat: "เครื่องป้องกัน" },
+            { id: "item_39", lvl: 60, th: "สนับแขนฝุ่นประกายดาว", itemLvl: "30", attr: "สตาร์ไลท์", stats: "DEF+21, SP+100", mainMat: "ประกายดาว", subMats: ["หนัง"], cat: "เครื่องป้องกัน" },
+            { id: "item_40", lvl: 60, th: "เสื้อเชิ้ตฝุ่นประกายดาว", itemLvl: "30", attr: "สตาร์ไลท์", stats: "ATK+16, MATK+16", mainMat: "ประกายดาว", subMats: ["หญ้า"], cat: "เครื่องป้องกัน" },
+            { id: "item_41", lvl: 60, th: "รองเท้าสั้นฝุ่นประกายดาว", itemLvl: "30", attr: "สตาร์ไลท์", stats: "DEF+5, MDEF+26", mainMat: "ประกายดาว", subMats: ["เหล็กแดง"], cat: "เครื่องป้องกัน" },
+            { id: "item_42", lvl: 60, th: "แหวนรุ่งโรจน์ประกายดาว", itemLvl: "30", attr: "สตาร์ไลท์", stats: "MATK+25, MDEF+6", mainMat: "ประกายดาว", subMats: ["ผลึกคริสตัล"], cat: "เครื่องประดับ" },
+            { id: "item_43", lvl: 60, th: "แหวนคมประกายดาว", itemLvl: "30", attr: "สตาร์ไลท์", stats: "ATK+25, DEF+6", mainMat: "ประกายดาว", subMats: ["ผลึกคริสตัล"], cat: "เครื่องประดับ" },
+            { id: "item_44", lvl: 62, th: "ขวานเวทย์น้ำค้างแข็งประกายดาว", itemLvl: "31", attr: "สตาร์ไลท์", stats: "MATK+31, HP+40", mainMat: "ประกายดาว", subMats: ["มนต์ตรา", "หยก"], cat: "อาวุธ" },
+            { id: "item_45", lvl: 62, th: "กรงเล็บคมระเบิดประกายดาว", itemLvl: "31", attr: "สตาร์ไลท์", stats: "ATK+32, SPD+32", mainMat: "ประกายดาว", subMats: ["เหล็กแดง", "ตะกั่ว"], cat: "อาวุธ" },
+            { id: "item_46", lvl: "-", th: "ขนประกายดาว", itemLvl: "32", attr: "สตาร์ไลท์", stats: "ไอเทมระดับ 32", mainMat: "ประกายดาว", subMats: ["-"], cat: "วัตถุดิบ/อื่นๆ" },
+            { id: "item_47", lvl: 66, th: "เสื้อคลุมเวทย์น้ำค้างแข็งประกายดาว", itemLvl: "33", attr: "สตาร์ไลท์", stats: "MDEF+34", mainMat: "ประกายดาว", subMats: ["มนต์ตรา", "หนัง"], cat: "เครื่องป้องกัน" },
+            { id: "item_48", lvl: 66, th: "ชุดเกราะระเบิดประกายดาว", itemLvl: "33", attr: "สตาร์ไลท์", stats: "DEF+34", mainMat: "ประกายดาว", subMats: ["ทองแดง", "กระดูก"], cat: "เครื่องป้องกัน" },
+            { id: "item_49", lvl: "-", th: "คริสตัลน้ำแข็งประกายดาว", itemLvl: "34", attr: "สตาร์ไลท์", stats: "ไอเทมระดับ 34", mainMat: "ประกายดาว", subMats: ["-"], cat: "วัตถุดิบ/อื่นๆ" },
+            { id: "item_50", lvl: 70, th: "ถุงมือน้ำค้างแข็งประกายดาว", itemLvl: "35", attr: "สตาร์ไลท์", stats: "MDEF+26, SPD+10", mainMat: "ประกายดาว", subMats: ["หยก", "มนต์ตรา"], cat: "เครื่องป้องกัน" },
+            { id: "item_51", lvl: 70, th: "สนับแขนระเบิดประกายดาว", itemLvl: "35", attr: "สตาร์ไลท์", stats: "DEF+26, SPD+10", mainMat: "ประกายดาว", subMats: ["ทองแดง", "เหล็กแดง"], cat: "เครื่องป้องกัน" },
+            { id: "item_52", lvl: 74, th: "มงกุฎเวทย์น้ำค้างแข็งประกายดาว", itemLvl: "37", attr: "สตาร์ไลท์", stats: "MDEF+28, DEF+10", mainMat: "ประกายดาว", subMats: ["มนต์ตรา", "ผลึกคริสตัล"], cat: "เครื่องป้องกัน" },
+            { id: "item_53", lvl: 74, th: "หมวกเกราะระเบิดประกายดาว", itemLvl: "37", attr: "สตาร์ไลท์", stats: "DEF+28, MDEF+10", mainMat: "ประกายดาว", subMats: ["ทองแดง", "ตะกั่ว"], cat: "เครื่องป้องกัน" },
+            { id: "item_54", lvl: "-", th: "อักขระศักดิ์สิทธิ์ประกายดาว", itemLvl: "38", attr: "สตาร์ไลท์", stats: "ไอเทมระดับ 38", mainMat: "ประกายดาว", subMats: ["-"], cat: "วัตถุดิบ/อื่นๆ" },
+            { id: "item_55", lvl: 78, th: "รองเท้าเวทย์น้ำค้างแข็งประกายดาว", itemLvl: "39", attr: "สตาร์ไลท์", stats: "MDEF+30, SPD+10", mainMat: "ประกายดาว", subMats: ["มนต์ตรา", "หนัง"], cat: "เครื่องป้องกัน" },
+            { id: "item_56", lvl: 78, th: "รองเท้าศึกระเบิดประกายดาว", itemLvl: "39", attr: "สตาร์ไลท์", stats: "DEF+40, SPD-5", mainMat: "ประกายดาว", subMats: ["ทองแดง", "กระดูก"], cat: "เครื่องป้องกัน" },
+            { id: "item_57", lvl: 80, th: "สร้อยคอน้ำค้างแข็งประกายดาว", itemLvl: "40", attr: "สตาร์ไลท์", stats: "MATK+30, MDEF+11", mainMat: "ประกายดาว", subMats: ["ผลึกปม", "มนต์ตรา"], cat: "เครื่องประดับ" },
+            { id: "item_58", lvl: 80, th: "สร้อยคอระเบิดประกายดาว", itemLvl: "40", attr: "สตาร์ไลท์", stats: "ATK+30, DEF+11", mainMat: "ประกายดาว", subMats: ["ผลึกปม", "มนต์ตรา"], cat: "เครื่องประดับ" },
+            { id: "item_59", lvl: 82, th: "คทาเวทย์ดาราประกายดาว", itemLvl: "41", attr: "สตาร์ไลท์", stats: "MATK+42, MDEF+40", mainMat: "ประกายดาว", subMats: ["อัญมณี", "ผลึกคริสตัล", "สีขาว"], cat: "อาวุธ" },
+            { id: "item_60", lvl: 82, th: "ขวานเหล็กห้วงอวกาศ", itemLvl: "41", attr: "สตาร์ไลท์", stats: "ATK+42, DEF+40", mainMat: "ประกายดาว", subMats: ["ไทเทเนียม", "ทองแดง", "ทองคำ"], cat: "อาวุธ" },
+            { id: "item_61", lvl: 86, th: "เสื้อคลุมเวทย์ดาราประกายดาว", itemLvl: "43", attr: "สตาร์ไลท์", stats: "MDEF+44", mainMat: "ประกายดาว", subMats: ["อัญมณี", "ขน", "สีขาว"], cat: "เครื่องป้องกัน" },
+            { id: "item_62", lvl: 86, th: "ชุดเกราะห้วงอวกาศ", itemLvl: "43", attr: "สตาร์ไลท์", stats: "DEF+44", mainMat: "ประกายดาว", subMats: ["ทองแดง", "เหล็กกล้า", "ไทเทเนียม"], cat: "เครื่องป้องกัน" },
+            { id: "item_63", lvl: 90, th: "ถุงมือดาราประกายดาว", itemLvl: "45", attr: "สตาร์ไลท์", stats: "MDEF+36, SPD+10", mainMat: "ประกายดาว", subMats: ["อัญมณี", "สีขาว", "ผลึกปม"], cat: "เครื่องป้องกัน" },
+            { id: "item_64", lvl: 90, th: "สนับแขนห้วงอวกาศ", itemLvl: "45", attr: "สตาร์ไลท์", stats: "DEF+36, SPD+10", mainMat: "ประกายดาว", subMats: ["ไทเทเนียม", "ทองแดง", "ผลึกปม"], cat: "เครื่องป้องกัน" },
+            { id: "item_65", lvl: 94, th: "มงกุฎเวทย์ดาราประกายดาว", itemLvl: "47", attr: "สตาร์ไลท์", stats: "MDEF+32, DEF+15", mainMat: "ประกายดาว", subMats: ["เงิน", "อัญมณี", "ไทเทเนียม"], cat: "เครื่องป้องกัน" },
+            { id: "item_66", lvl: 94, th: "หมวกเกราะห้วงอวกาศ", itemLvl: "47", attr: "สตาร์ไลท์", stats: "DEF+32, MDEF+15", mainMat: "ประกายดาว", subMats: ["ทองแดง", "เหล็กกล้า", "ไทเทเนียม"], cat: "เครื่องป้องกัน" },
+            { id: "item_67", lvl: 98, th: "รองเท้าเวทย์ดาราประกายดาว", itemLvl: "49", attr: "สตาร์ไลท์", stats: "MDEF+38, SPD+12", mainMat: "ประกายดาว", subMats: ["ทองคำ", "อัญมณี", "กระดูก"], cat: "เครื่องป้องกัน" },
+            { id: "item_68", lvl: 98, th: "รองเท้าศึกห้วงอวกาศ", itemLvl: "49", attr: "สตาร์ไลท์", stats: "DEF+40, SPD+10", mainMat: "ประกายดาว", subMats: ["เหล็กกล้า", "ดีบุก", "ไทเทเนียม"], cat: "เครื่องป้องกัน" },
+            { id: "item_69", lvl: "-", th: "ไม้คริสตัลประกายดาวไร้ที่ติ", itemLvl: "51", attr: "สตาร์ไลท์", stats: "ไอเทมระดับ 51", mainMat: "ประกายดาว", subMats: ["-"], cat: "วัตถุดิบ/อื่นๆ" },
+            { id: "item_70", lvl: 102, th: "ดาบเวทย์รอยแผลประกายดาว", itemLvl: "51", attr: "สตาร์ไลท์", stats: "MATK+80, สุ่มโบนัส", mainMat: "ประกายดาว", subMats: ["ไม้", "ทองคำ", "เงิน", "ผลึกคริสตัล"], cat: "อาวุธ" },
+            { id: "item_71", lvl: 102, th: "ดาบโค้งเงาประกายดาว", itemLvl: "51", attr: "สตาร์ไลท์", stats: "ATK+80, สุ่มโบนัส", mainMat: "ประกายดาว", subMats: ["ดอกไม้", "ใบไม้", "ไม้", "เหล็กกล้า"], cat: "อาวุธ" },
+            { id: "item_72", lvl: 104, th: "แหวนเวทย์ห้วงอวกาศ", itemLvl: "52", attr: "สตาร์ไลท์", stats: "MATK+32, สุ่มโบนัส", mainMat: "ประกายดาว", subMats: ["เหล็กกล้า", "ดีบุก", "อะลูมิเนียม", "หยก"], cat: "เครื่องประดับ" },
+            { id: "item_73", lvl: 104, th: "แหวนศึกห้วงอวกาศ", itemLvl: "52", attr: "สตาร์ไลท์", stats: "ATK+32, สุ่มโบนัส", mainMat: "ประกายดาว", subMats: ["ทองคำ", "เงิน", "ทองแดง", "เหล็กกล้า"], cat: "เครื่องประดับ" },
+            { id: "item_74", lvl: 106, th: "เสื้อคลุมเวทย์รอยแผลประกายดาว", itemLvl: "53", attr: "สตาร์ไลท์", stats: "HP+560, สุ่มโบนัส", mainMat: "ประกายดาว", subMats: ["อัญมณี", "เหล็กกล้า", "ผลึกคริสตัล", "หิน"], cat: "เครื่องป้องกัน" },
+            { id: "item_75", lvl: 106, th: "ชุดเกราะเงาประกายดาว", itemLvl: "53", attr: "สตาร์ไลท์", stats: "HP+560, สุ่มโบนัส", mainMat: "ประกายดาว", subMats: ["เหล็กกล้า", "อะลูมิเนียม", "หยก", "อัญมณี"], cat: "เครื่องป้องกัน" },
+            { id: "item_76", lvl: "-", th: "ขนประกายดาวไร้ที่ติ", itemLvl: "54", attr: "สตาร์ไลท์", stats: "ไอเทมระดับ 54", mainMat: "ประกายดาว", subMats: ["-"], cat: "วัตถุดิบ/อื่นๆ" },
+            { id: "item_77", lvl: 108, th: "ดาบเวทย์เงาประกายดาว", itemLvl: "54", attr: "สตาร์ไลท์", stats: "ATK+83, สุ่มโบนัส", mainMat: "ประกายดาว", subMats: ["ไทเทเนียม", "หนัง", "ขน", "กระดูก"], cat: "อาวุธ" },
+            { id: "item_78", lvl: 108, th: "ดาบโค้งห้วงอวกาศ", itemLvl: "54", attr: "สตาร์ไลท์", stats: "ATK+83, สุ่มโบนัส", mainMat: "ประกายดาว", subMats: ["ทองแดง", "ผลึกคริสตัล", "หิน", "ไทเทเนียม"], cat: "อาวุธ" },
+            { id: "item_79", lvl: 110, th: "ถุงมือรอยแผลประกายดาว", itemLvl: "55", attr: "สตาร์ไลท์", stats: "DEF+40, สุ่มโบนัส", mainMat: "ประกายดาว", subMats: ["ดอกไม้", "ใบไม้", "ไม้", "ผลึกคริสตัล"], cat: "เครื่องป้องกัน" },
+            { id: "item_80", lvl: 110, th: "สนับแขนเงาประกายดาว", itemLvl: "55", attr: "สตาร์ไลท์", stats: "DEF+40, สุ่มโบนัส", mainMat: "ประกายดาว", subMats: ["ดอกไม้", "เหล็กกล้า", "ขน", "กระดูก"], cat: "เครื่องป้องกัน" },
+            { id: "item_81", lvl: 112, th: "พัดมังกรห้วงอวกาศ", itemLvl: "56", attr: "สตาร์ไลท์", stats: "MATK+85, สุ่มโบนัส", mainMat: "ประกายดาว", subMats: ["เงิน", "ทองแดง", "เหล็กกล้า", "หยก"], cat: "อาวุธ" },
+            { id: "item_82", lvl: 112, th: "ขวานศึกห้วงอวกาศ", itemLvl: "56", attr: "สตาร์ไลท์", stats: "ATK+85, สุ่มโบนัส", mainMat: "ประกายดาว", subMats: ["ไม้", "ทองคำ", "เงิน", "ทองแดง"], cat: "อาวุธ" },
+            { id: "item_83", lvl: "-", th: "แก้วหลากสีประกายดาวไร้ที่ติ", itemLvl: "57", attr: "สตาร์ไลท์", stats: "ไอเทมระดับ 57", mainMat: "ประกายดาว", subMats: ["-"], cat: "วัตถุดิบ/อื่นๆ" },
+            { id: "item_84", lvl: 114, th: "มงกุฎเวทย์รอยแผลประกายดาว", itemLvl: "57", attr: "สตาร์ไลท์", stats: "MDEF+35, สุ่มโบนัส", mainMat: "ประกายดาว", subMats: ["อะลูมิเนียม", "หยก", "อัญมณี", "ผลึกคริสตัล"], cat: "เครื่องป้องกัน" },
+            { id: "item_85", lvl: 114, th: "หมวกเกราะเงาประกายดาว", itemLvl: "57", attr: "สตาร์ไลท์", stats: "MDEF+35, สุ่มโบนัส", mainMat: "ประกายดาว", subMats: ["เหล็กกล้า", "หยก", "อัญมณี"], cat: "เครื่องป้องกัน" },
+            { id: "item_86", lvl: 116, th: "ไม้เท้าห้วงอวกาศ", itemLvl: "58", attr: "สตาร์ไลท์", stats: "MATK+87, สุ่มโบนัส", mainMat: "ประกายดาว", subMats: ["เหล็กกล้า", "ผลึกคริสตัล", "หิน", "ไทเทเนียม"], cat: "อาวุธ" },
+            { id: "item_87", lvl: 116, th: "กรงเล็บห้วงอวกาศ", itemLvl: "58", attr: "สตาร์ไลท์", stats: "ATK+87, สุ่มโบนัส", mainMat: "ประกายดาว", subMats: ["เงิน", "อัญมณี", "เหล็กกล้า", "ผลึกคริสตัล"], cat: "อาวุธ" },
+            { id: "item_88", lvl: "-", th: "เงินลึกลับประกายดาวไร้ที่ติ", itemLvl: "59", attr: "สตาร์ไลท์", stats: "ไอเทมระดับ 59", mainMat: "ประกายดาว", subMats: ["-"], cat: "วัตถุดิบ/อื่นๆ" },
+            { id: "item_89", lvl: 118, th: "รองเท้าเวทย์รอยแผลประกายดาว", itemLvl: "59", attr: "สตาร์ไลท์", stats: "SPD+40, สุ่มโบนัส", mainMat: "ประกายดาว", subMats: ["ดอกไม้", "ผลึกคริสตัล", "น้ำฝน", "กระดูก"], cat: "เครื่องป้องกัน" },
+            { id: "item_90", lvl: 118, th: "รองเท้าศึกเงาประกายดาว", itemLvl: "59", attr: "สตาร์ไลท์", stats: "SPD+40, สุ่มโบนัส", mainMat: "ประกายดาว", subMats: ["เหล็กกล้า", "ไทเทเนียม", "หนัง", "ขน"], cat: "เครื่องป้องกัน" },
+            { id: "item_91", lvl: 120, th: "แหวนรอยแผลประกายดาว", itemLvl: "60", attr: "สตาร์ไลท์", stats: "MATK+40, สุ่มโบนัส", mainMat: "ประกายดาว", subMats: ["ทองคำ", "เงิน", "ทองแดง", "ผลึกคริสตัล"], cat: "เครื่องประดับ" },
+            { id: "item_92", lvl: 120, th: "แหวนเงาประกายดาว", itemLvl: "60", attr: "สตาร์ไลท์", stats: "ATK+40, สุ่มโบนัส", mainMat: "ประกายดาว", subMats: ["ใบไม้", "ไม้", "ทองคำ", "เหล็กกล้า"], cat: "เครื่องประดับ" }
+        ];
+
+        const categories = ["ทั้งหมด", "อาวุธ", "เครื่องป้องกัน", "เครื่องประดับ", "วัตถุดิบ/อื่นๆ"];
+        let activeCategory = "ทั้งหมด", activeLevelFilter = "all";
+
+        window.onload = function() {
+            renderCategoryButtons();
+            renderData();
+        };
+
+        function renderCategoryButtons() {
+            document.getElementById('categoryButtons').innerHTML = categories.map(cat => {
+                const isActive = cat === activeCategory;
+                const activeClasses = isActive 
+                    ? "bg-blue-600 text-white border-blue-500 shadow-md shadow-blue-500/20" 
+                    : "bg-slate-800 text-slate-300 border-slate-700 hover:bg-slate-700/80 hover:text-white";
+                return `<button onclick="setCategory('${cat}')" class="px-3 py-1.5 rounded-xl text-xs sm:text-sm font-medium border transition-all duration-200 ${activeClasses}">${cat}</button>`;
+            }).join('');
+        }
+
+        function setCategory(cat) {
+            activeCategory = cat;
+            renderCategoryButtons();
+            renderData();
+        }
+
+        function filterByLevel(range, element) {
+            activeLevelFilter = range;
+            document.querySelectorAll('.lvl-btn').forEach(btn => {
+                btn.classList.remove('bg-blue-600', 'text-white', 'border-blue-500');
+                btn.classList.add('bg-slate-800', 'text-slate-300', 'border-slate-700');
+            });
+            element.classList.remove('bg-slate-800', 'text-slate-300', 'border-slate-700');
+            element.classList.add('bg-blue-600', 'text-white', 'border-blue-500');
+            renderData();
+        }
+
+        function handleSearch() {
+            const searchVal = document.getElementById('searchInput').value.trim();
+            document.getElementById('clearSearch').classList.toggle('hidden', searchVal.length === 0);
+            renderData();
+        }
+
+        function clearSearch() {
+            document.getElementById('searchInput').value = '';
+            document.getElementById('clearSearch').classList.add('hidden');
+            renderData();
+        }
+
+        function resetFilters() {
+            document.getElementById('searchInput').value = '';
+            document.getElementById('clearSearch').classList.add('hidden');
+            activeCategory = "ทั้งหมด";
+            activeLevelFilter = "all";
+            document.querySelectorAll('.lvl-btn').forEach((btn, idx) => {
+                if(idx === 0) {
+                    btn.classList.add('bg-blue-600', 'text-white', 'border-blue-500');
+                    btn.classList.remove('bg-slate-800', 'text-slate-300', 'border-slate-700');
+                } else {
+                    btn.classList.remove('bg-blue-600', 'text-white', 'border-blue-500');
+                    btn.classList.add('bg-slate-800', 'text-slate-300', 'border-slate-700');
+                }
+            });
+            renderCategoryButtons();
+            renderData();
+        }
+
+        function getFilteredData() {
+            const query = document.getElementById('searchInput').value.toLowerCase().trim();
+            return itemData.filter(item => {
+                if (activeCategory !== "ทั้งหมด" && item.cat !== activeCategory) return false;
+                const numLvl = typeof item.lvl === 'number' ? item.lvl : -1;
+                if (activeLevelFilter === "100+" && numLvl < 100) return false;
+                if (activeLevelFilter === "60-99" && (numLvl < 60 || numLvl > 99)) return false;
+                if (activeLevelFilter === "30-59" && (numLvl < 30 || numLvl > 59)) return false;
+                if (activeLevelFilter === "under30" && (numLvl >= 30 || numLvl === -1)) return false;
+
+                if (query) {
+                    return item.th.toLowerCase().includes(query) ||
+                           item.lvl.toString().includes(query) ||
+                           item.itemLvl.toString().includes(query) ||
+                           item.attr.toLowerCase().includes(query) ||
+                           item.stats.toLowerCase().includes(query) ||
+                           item.mainMat.toLowerCase().includes(query) ||
+                           item.subMats.some(m => m.toLowerCase().includes(query));
+                }
+                return true;
+            });
+        }
+
+        function renderData() {
+            const filtered = getFilteredData();
+            const tableBody = document.getElementById('tableBody');
+            const mobileCards = document.getElementById('mobileCards');
+            const noResults = document.getElementById('noResults');
+
+            document.getElementById('itemCount').innerText = filtered.length;
+            document.getElementById('totalCount').innerText = itemData.length;
+
+            if (filtered.length === 0) {
+                tableBody.innerHTML = '';
+                mobileCards.innerHTML = '';
+                noResults.classList.remove('hidden');
+                return;
+            }
+
+            noResults.classList.add('hidden');
+
+            tableBody.innerHTML = filtered.map(item => `
+                <tr class="hover:bg-slate-800/60 transition-colors">
+                    <td class="py-2.5 px-3 text-center">
+                        <img src="images/${item.id}.png" alt="${item.th}" class="w-10 h-10 object-contain rounded bg-slate-950 border border-slate-700 mx-auto" onerror="this.src='https://via.placeholder.com/40?text=No+Img'">
+                    </td>
+                    <td class="py-3 px-3 text-center font-bold text-blue-400">Lv.${item.lvl}</td>
+                    <td class="py-3 px-4 font-medium text-slate-100">${item.th}</td>
+                    <td class="py-3 px-3 text-center"><span class="px-2 py-0.5 rounded-full text-[10px] bg-slate-800 border border-slate-700">${item.itemLvl}</span></td>
+                    <td class="py-3 px-4 text-slate-300">${item.attr}</td>
+                    <td class="py-3 px-4 font-mono text-emerald-400 text-xs">${item.stats}</td>
+                    <td class="py-3 px-4 text-slate-300">${item.mainMat}</td>
+                    <td class="py-3 px-4 text-slate-400">${item.subMats.join(', ')}</td>
+                </tr>
+            `).join('');
+
+            mobileCards.innerHTML = filtered.map(item => `
+                <div class="bg-slate-900 border border-slate-800 p-3.5 rounded-xl space-y-2">
+                    <div class="flex items-center gap-3">
+                        <img src="images/${item.id}.png" alt="${item.th}" class="w-12 h-12 object-contain rounded bg-slate-950 border border-slate-700 flex-shrink-0" onerror="this.src='https://via.placeholder.com/48?text=No+Img'">
+                        <div class="flex-1 min-w-0">
+                            <div class="flex justify-between items-start">
+                                <span class="text-xs font-bold text-blue-400">Lv.${item.lvl}</span>
+                                <span class="text-[10px] bg-slate-800 px-2 py-0.5 rounded border border-slate-700">${item.attr}</span>
+                            </div>
+                            <h3 class="font-medium text-sm text-slate-100 truncate">${item.th}</h3>
+                        </div>
+                    </div>
+                    <div class="text-xs font-mono text-emerald-400 bg-slate-950/50 p-2 rounded border border-slate-800/80">${item.stats}</div>
+                    <div class="text-xs text-slate-400 space-y-0.5">
+                        <p><span class="text-slate-500">วัตถุดิบหลัก:</span> ${item.mainMat}</p>
+                        <p><span class="text-slate-500">วัตถุดิบรอง:</span> ${item.subMats.join(', ')}</p>
+                    </div>
+                </div>
+            `).join('');
+        }
+    </script>
+</body>
+</html>
